@@ -9,20 +9,63 @@
     <div class='col-md-8 offset-md-1'>
   		<h2>Book detail</h2>
   		<table class='table'>
-  		  <tr>
+  		  <tr class="d-flex">
           <td><%= link_to(@books.user) do %>
             <%= image_tag @books.user.get_profile_image, size:"100x100" %><br>
             <%= @books.user.name %>
             <% end %>
           </td>
           <td><%= link_to @books.title, @book %></td>
-          <td><%= @books.body %></td>
+          <td class="flex-fill">
+            <%= @books.body %>
+          </td>
+          
+          <td class="d-flex flex-column d-inline-block">
+            <% if @books.favorited_by?(current_user) %>
+              <%= link_to book_favorites_path(@books), method: :delete do %>
+                <i class="fas fa-heart"></i><%= @books.favorites.count %>
+              <% end %>
+              
+            <% else %>
+              <%= link_to book_favorites_path(@books), method: :post do %>
+                <i class="fas fa-heart"></i><%= @books.favorites.count %>
+              <% end %>
+            <% end %>
+          </td>
+          <td>
+            コメント数:
+            <%= @books.comments.count %>
+          </td>
           <% if @books.user_id == current_user.id %>
-            <td><%= link_to 'Edit', edit_book_path(@books), class: "btn btn-sm btn-success" %></td>
-            <td><%= link_to 'Destroy', @books, method: :delete, data: { confirm: '本当に消しますか？' }, class: "btn btn-sm btn-danger"%></td>
+            <td class="d-flex flex-column">
+              <%= link_to 'Edit', edit_book_path(@books), class: "btn btn-sm btn-success mb-2" %>
+              <%= link_to 'Destroy', @books, method: :delete, data: { confirm: '本当に消しますか？' }, class: "btn btn-sm btn-danger"%>
+            </td>
           <% end%>
         </tr>
       </table>
+      <table class="table table-sm w-75">
+        <% @books.comments.each do |comment|%>
+        <tr>
+          <td>
+            <%= link_to(@books.user) do %>
+            <%= image_tag comment.user.get_profile_image, size:"50x50" %><br>
+            <%= comment.user.name %>
+            <% end %>
+          </td>
+          <td>
+            <%= comment.comment %>
+          </td>    
+        </tr>
+        <% end %>
+      </table>
+      <%= form_with model:[@books, @comments] do |f| %>
+        <div class="form-group">
+          <%= f.label :comment, class: "mb-1" %>
+          <%= f.text_area :comment, row:'5',class: 'form-control book_title mb-2' %>
+          <%= f.submit "Create Comment", class: 'btn btn-success' %>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
